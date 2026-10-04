@@ -158,3 +158,65 @@ def predict_fraud(txn: Transaction):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+from typing import List
+
+@app.post("/api/predict_bulk")
+def predict_bulk_fraud(txns: List[Transaction]):
+    results = []
+    txn_time = pd.to_datetime(datetime.now())
+    
+    for txn in txns:
+        try:
+            if not history_df.empty:
+                user_history = history_df[history_df['user_id'] == txn.user_id].sort_values('timestamp')
+            else:
+                user_history = pd.DataFrame()
+                
+            time_since_last = 0
+            avg_7d = 0
+            txns_1h = 0
+            loc_changed = 1
+            dev_changed = 1
+            
+            if not user_history.empty:
+                last_txn = user_history.iloc[-1]
+                time_since_last = (txn_time - last_txn['timestamp']).total_seconds()
+                loc_changed = 1 if txn.location != last_txn['location'] else 0
+                dev_changed = 1 if txn.device_id != last_txn['device_id'] else 0
+                
+                seven_days_ago = txn_time - pd.Timedelta(days=7)
+                past_7d = user_history[user_history['timestamp'] >= seven_days_ago]
+                if not past_7d.empty:
+                    avg_7d = past_7d['amount'].mean()
+                    
+                one_hour_ago = txn_time - pd.Timedelta(hours=1)
+                past_1h = user_history[user_history['timestamp'] >= one_hour_ago]
+                txns_1h = len(past_1h)
+                
+            features_dict = {
+                'amount': txn.amount,
+                'time_since_last_txn': time_since_last,
+                'avg_amount_7d': avg_7d,
+                'txns_last_1h': txns_1h,
+                'location_changed': loc_changed,
+                'device_changed': dev_changed
+            }
+            
+            for feature in ml_features:
+                if feature.startswith('merchant_category_'):
+                    cat = feature.replace('merchant_category_', '')
+                    features_dict[feature] = 1 if txn.merchant_category == cat else 0
+                    
+            res = calculate_fraud_score(txn.user_id, txn.amount, features_dict)
+            results.append({
+                "user_id": txn.user_id,
+                "amount": txn.amount,
+                "score": res["score"],
+                "status": res["status"]
+            })
+        except:
+            continue
+            
+    return {"total_processed": len(results), "results": results}
+

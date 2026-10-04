@@ -180,11 +180,76 @@
                     Analyze Transaction
                 </button>
             </form>
+            
+            <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                <p class="text-xs text-muted mb-3 uppercase tracking-wider font-semibold">Or Process Bulk Data</p>
+                <input type="file" id="csvFile" accept=".csv" class="hidden">
+                <button onclick="document.getElementById('csvFile').click()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg text-xs font-bold transition-colors w-full flex items-center justify-center gap-2 border border-indigo-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    Upload CSV Batch
+                </button>
+                <p class="text-[10px] text-gray-400 mt-2">Format: user_id, amount, merchant_category, device_id, location</p>
+            </div>
         </div>
     </div>
 
     <script>
         let gaugeChart = null;
+
+        // Bulk CSV Upload Logic
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const text = event.target.result;
+                const rows = text.split('\n').map(row => row.trim()).filter(row => row.length > 0);
+                
+                // Skip header if exists
+                let startIndex = 0;
+                if (rows[0].toLowerCase().includes('user_id')) startIndex = 1;
+                
+                const txns = [];
+                for (let i = startIndex; i < rows.length; i++) {
+                    const cols = rows[i].split(',');
+                    if (cols.length >= 5) {
+                        txns.push({
+                            user_id: cols[0].trim(),
+                            amount: parseFloat(cols[1].trim()),
+                            merchant_category: cols[2].trim(),
+                            device_id: cols[3].trim(),
+                            location: cols[4].trim()
+                        });
+                    }
+                }
+                
+                if (txns.length === 0) {
+                    alert('No valid transactions found in CSV. Make sure format matches.');
+                    return;
+                }
+                
+                alert(`Found ${txns.length} transactions. Sending to Fraud Engine for batch analysis...`);
+                
+                try {
+                    const apiUrl = window.location.hostname === 'localhost' ? 'http://127.0.0.1:8000/api/predict_bulk' : '/api/predict_bulk';
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(txns)
+                    });
+                    
+                    const data = await response.json();
+                    const frauds = data.results.filter(r => r.status === 'CRITICAL' || r.status === 'WARNING');
+                    
+                    alert(`Batch Complete!\n\nProcessed: ${data.total_processed}\nAnomalies Found: ${frauds.length}\n\nCheck browser console for detailed breakdown.`);
+                    console.log('--- BATCH FRAUD REPORT ---', frauds);
+                } catch (err) {
+                    alert('Error processing batch: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        });
 
         document.getElementById('fraudForm').addEventListener('submit', async (e) => {
             e.preventDefault();
