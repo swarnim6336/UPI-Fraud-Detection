@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ironclad AI | UPI Fraud Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #0b0f19; color: #e0e6ed; font-family: 'Courier New', Courier, monospace; }
+        .neon-cyan { color: #00e5ff; text-shadow: 0 0 5px rgba(0,229,255,0.5); }
+        .neon-red { color: #ff2b2b; text-shadow: 0 0 5px rgba(255,43,43,0.5); }
+        .card { background-color: #121826; border: 1px solid #1e293b; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); }
+        .input-box { background-color: #1e293b; color: white; border: 1px solid #334155; }
+        .input-box:focus { outline: none; border-color: #00e5ff; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-10">
+            <h1 class="text-4xl font-bold neon-cyan mb-2">IRONCLAD AI // UPI FRAUD NEURAL ENGINE</h1>
+            <p class="text-gray-400">Real-time anomaly detection powered by Isolation Forest & Time-Series Analysis.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Sidebar / Controls -->
+            <div class="card p-6 col-span-1">
+                <h3 class="text-xl font-bold mb-6 text-white border-b border-slate-700 pb-2">🎛️ INFERENCE CONTROLS</h3>
+                
+                <form id="fraudForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Target User ID</label>
+                        <select id="user_id" class="w-full p-2 rounded input-box">
+                            <option value="user_1">user_1</option>
+                            <option value="user_42">user_42</option>
+                            <option value="user_99">user_99</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Transaction Amount (₹)</label>
+                        <input type="number" id="amount" value="1500" class="w-full p-2 rounded input-box">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Merchant Category</label>
+                        <select id="category" class="w-full p-2 rounded input-box">
+                            <option value="Grocery">Grocery</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Transfer">Transfer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Location Data</label>
+                        <input type="text" id="location" value="Mumbai" class="w-full p-2 rounded input-box">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Device Fingerprint</label>
+                        <input type="text" id="device" value="device_12345" class="w-full p-2 rounded input-box">
+                    </div>
+                    
+                    <button type="submit" class="w-full mt-6 bg-[#00e5ff] hover:bg-[#00b8cc] text-black font-bold py-3 px-4 rounded transition-colors">
+                        🚀 EXECUTE INFERENCE
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div class="col-span-1 md:col-span-2 space-y-6">
+                <!-- Status Banner -->
+                <div id="statusBanner" class="card p-6 hidden">
+                    <h2 id="statusText" class="text-3xl font-bold text-center"></h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Gauge -->
+                    <div class="card p-6 flex flex-col items-center justify-center hidden" id="chartContainer">
+                        <h3 class="text-lg font-bold text-white mb-4">Risk Assessment Score</h3>
+                        <div class="relative w-48 h-48">
+                            <canvas id="gaugeChart"></canvas>
+                            <div class="absolute inset-0 flex items-center justify-center flex-col mt-8">
+                                <span id="scoreText" class="text-4xl font-bold"></span>
+                                <span class="text-xs text-gray-400">/ 100</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Explanations -->
+                    <div class="card p-6 hidden" id="explainContainer">
+                        <h3 class="text-lg font-bold text-white mb-4">Threat Intelligence</h3>
+                        <ul id="reasonsList" class="space-y-3"></ul>
+                    </div>
+                </div>
+
+                <!-- Feature Vector -->
+                <div class="card p-6 hidden" id="featureContainer">
+                    <h3 class="text-lg font-bold text-white mb-4">Extracted Feature Vector</h3>
+                    <pre id="featureJson" class="bg-[#0b0f19] p-4 rounded text-sm text-gray-300 overflow-x-auto"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gaugeChart = null;
+
+        document.getElementById('fraudForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector('button');
+            btn.innerText = 'ANALYZING...';
+            btn.disabled = true;
+            
+            const payload = {
+                user_id: document.getElementById('user_id').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                merchant_category: document.getElementById('category').value,
+                location: document.getElementById('location').value,
+                device_id: document.getElementById('device').value
+            };
+
+            try {
+                // Determine API URL based on environment (local dev vs Vercel)
+                const apiUrl = window.location.hostname === 'localhost' ? 'http://127.0.0.1:8000/api/predict' : '/api/predict';
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                displayResults(data);
+            } catch (err) {
+                alert('Error connecting to API. ' + err.message);
+            } finally {
+                btn.innerText = '🚀 EXECUTE INFERENCE';
+                btn.disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            document.getElementById('statusBanner').classList.remove('hidden');
+            document.getElementById('chartContainer').classList.remove('hidden');
+            document.getElementById('explainContainer').classList.remove('hidden');
+            document.getElementById('featureContainer').classList.remove('hidden');
+
+            const statusText = document.getElementById('statusText');
+            let color = '#00e5ff';
+            let bgColor = 'rgba(0, 229, 255, 0.1)';
+            
+            if (data.status === 'CRITICAL') {
+                color = '#ff2b2b';
+                bgColor = 'rgba(255, 43, 43, 0.1)';
+                statusText.innerText = '🛑 TRANSACTION BLOCKED';
+            } else if (data.status === 'WARNING') {
+                color = '#ffb82b';
+                bgColor = 'rgba(255, 184, 43, 0.1)';
+                statusText.innerText = '⚠️ STEP-UP AUTH REQUIRED';
+            } else {
+                statusText.innerText = '✅ TRANSACTION APPROVED';
+            }
+            
+            statusText.style.color = color;
+            document.getElementById('statusBanner').style.backgroundColor = bgColor;
+            document.getElementById('statusBanner').style.borderColor = color;
+
+            // Update Gauge
+            document.getElementById('scoreText').innerText = data.score;
+            document.getElementById('scoreText').style.color = color;
+            
+            if(gaugeChart) gaugeChart.destroy();
+            const ctx = document.getElementById('gaugeChart').getContext('2d');
+            gaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [data.score, 100 - data.score],
+                        backgroundColor: [color, '#1e293b'],
+                        borderWidth: 0,
+                        circumference: 180,
+                        rotation: 270
+                    }]
+                },
+                options: {
+                    cutout: '80%',
+                    plugins: { tooltip: { enabled: false } },
+                    animation: { animateRotate: true, animateScale: false }
+                }
+            });
+
+            // Update Reasons
+            const list = document.getElementById('reasonsList');
+            list.innerHTML = '';
+            data.reasons.forEach(r => {
+                const li = document.createElement('li');
+                li.className = 'p-3 rounded text-sm';
+                if(r.includes('exceeds') || r.includes('Isolation') || r.includes('velocity')) {
+                    li.style.backgroundColor = 'rgba(255, 43, 43, 0.1)';
+                    li.style.borderLeft = '4px solid #ff2b2b';
+                    li.innerText = '🛑 ' + r;
+                } else {
+                    li.style.backgroundColor = 'rgba(0, 229, 255, 0.1)';
+                    li.style.borderLeft = '4px solid #00e5ff';
+                    li.innerText = '🟢 ' + r;
+                }
+                list.appendChild(li);
+            });
+
+            // Update Features
+            document.getElementById('featureJson').innerText = JSON.stringify(data.feature_vector, null, 2);
+        }
+    </script>
+</body>
+</html>
