@@ -11,14 +11,15 @@ This project simulates, processes, and analyzes UPI (Unified Payments Interface)
 ## 🚀 Features
 - **Data Simulation Engine:** Generates realistic datasets with injected fraud patterns (late-night unknown transfers, location spoofing, massive spending spikes).
 - **Automated Feature Engineering:** Calculates rolling 7-day averages, time since last transaction, and velocity metrics on the fly.
-- **Hybrid Scoring Engine:** Aggregates predictions into a single, interpretable **Fraud Risk Score (0-100)** with human-readable explanations.
+- **Hybrid Scoring Engine:** Aggregates predictions into a single, interpretable **Fraud Risk Score (0-100)**.
 - **FastAPI Backend:** A blazing-fast REST API for real-time inference.
-- **Interactive Streamlit Dashboard:** A sleek UI to test transactions and visualize the scoring engine's decisions.
+- **SOC Frontend Dashboard:** A sleek, dark-mode Cybersecurity Operations Center UI built with Tailwind CSS and Chart.js.
 
 ## 🛠️ Tech Stack
-- **Data Science:** `pandas`, `numpy`, `scikit-learn`
+- **Machine Learning:** `pandas`, `numpy`, `scikit-learn`
 - **Backend API:** `fastapi`, `uvicorn`
-- **Frontend Dashboard:** `streamlit`
+- **Frontend UI:** `HTML5`, `Tailwind CSS`, `Chart.js`
+- **Deployment:** Render (Dockerized Web Service)
 
 ## 🏃‍♂️ How to Run Locally
 
@@ -31,19 +32,18 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-2. **Generate Data and Train Models**
+2. **Generate Data and Train Models** (Optional - pre-trained models included)
 ```bash
 python generate_data.py
 python preprocess.py
 python train_models.py
 ```
 
-3. **Launch the Real-Time Dashboard**
-Simply run the included batch file (Windows):
+3. **Launch the Full-Stack App**
 ```bash
-run_demo.bat
+uvicorn api.index:app --reload
 ```
-*(This will automatically start both the FastAPI server on port 8000 and the Streamlit UI on port 8501).*
+*(This will automatically start the FastAPI server and serve the UI at `http://localhost:8000`)*
 
 ## 🧠 Model Performance Summary
 In our synthetic test dataset of 10,000 transactions (5% fraud rate), the unsupervised **Isolation Forest** model successfully flagged over 54% of complex behavioral anomalies entirely on its own, without relying on labeled training data. When combined with the statistical IQR and Z-Score engines, the hybrid system accurately identifies high-risk behavior instantly.
