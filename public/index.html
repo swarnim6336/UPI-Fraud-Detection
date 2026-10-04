@@ -6,6 +6,8 @@
     <title>IronClad.Ai | UPI Fraud Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -229,7 +231,11 @@
                     return;
                 }
                 
-                alert(`Found ${txns.length} transactions. Sending to Fraud Engine for batch analysis...`);
+                // Show analyzing state on the button
+                const btn = document.querySelector('button[onclick="document.getElementById(\'csvFile\').click()"]');
+                const origBtnHtml = btn.innerHTML;
+                btn.innerHTML = 'Processing Batch...';
+                btn.disabled = true;
                 
                 try {
                     const apiUrl = window.location.hostname === 'localhost' ? 'http://127.0.0.1:8000/api/predict_bulk' : '/api/predict_bulk';
@@ -242,10 +248,75 @@
                     const data = await response.json();
                     const frauds = data.results.filter(r => r.status === 'CRITICAL' || r.status === 'WARNING');
                     
-                    alert(`Batch Complete!\n\nProcessed: ${data.total_processed}\nAnomalies Found: ${frauds.length}\n\nCheck browser console for detailed breakdown.`);
-                    console.log('--- BATCH FRAUD REPORT ---', frauds);
+                    alert(`Batch Complete!\nProcessed: ${data.total_processed}\nAnomalies Found: ${frauds.length}\n\nDownloading Official PDF Report now...`);
+                    
+                    // Generate PDF Report using jsPDF
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Title and Header
+                    doc.setFontSize(22);
+                    doc.setTextColor(30, 58, 138); // Navy Blue
+                    doc.text("IronClad.Ai | Sentinel", 14, 22);
+                    
+                    doc.setFontSize(14);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text("Automated Bulk Fraud Analysis Report", 14, 32);
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`Total Transactions Analyzed: ${data.total_processed}`, 14, 42);
+                    doc.text(`Anomalies Detected (Warnings/Critical): ${frauds.length}`, 14, 48);
+                    doc.text(`Scan Date: ${new Date().toLocaleString()}`, 14, 54);
+                    
+                    // Build Table Data
+                    const tableColumn = ["User ID", "Amount (INR)", "Risk Score", "Status"];
+                    const tableRows = [];
+                    
+                    // Sort by highest risk first
+                    data.results.sort((a, b) => b.score - a.score).forEach(txn => {
+                        tableRows.push([
+                            txn.user_id,
+                            `Rs. ${txn.amount.toFixed(2)}`,
+                            txn.score,
+                            txn.status
+                        ]);
+                    });
+                    
+                    // Generate Table
+                    doc.autoTable({
+                        head: [tableColumn],
+                        body: tableRows,
+                        startY: 62,
+                        theme: 'grid',
+                        styles: { fontSize: 9, cellPadding: 3 },
+                        headStyles: { fillColor: [30, 58, 138], textColor: 255 }, 
+                        alternateRowStyles: { fillColor: [241, 245, 249] },
+                        didParseCell: function(data) {
+                            // Color code the status column in the PDF
+                            if (data.section === 'body' && data.column.index === 3) {
+                                if (data.cell.raw === 'CRITICAL') {
+                                    data.cell.styles.textColor = [220, 38, 38]; // Red
+                                    data.cell.styles.fontStyle = 'bold';
+                                } else if (data.cell.raw === 'WARNING') {
+                                    data.cell.styles.textColor = [217, 119, 6]; // Amber
+                                    data.cell.styles.fontStyle = 'bold';
+                                } else {
+                                    data.cell.styles.textColor = [22, 163, 74]; // Green
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Save the PDF
+                    doc.save(`IronClad_Fraud_Report_${Date.now()}.pdf`);
+                    
                 } catch (err) {
                     alert('Error processing batch: ' + err.message);
+                } finally {
+                    btn.innerHTML = origBtnHtml;
+                    btn.disabled = false;
+                    e.target.value = ''; // Reset input
                 }
             };
             reader.readAsText(file);
