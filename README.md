@@ -1,6 +1,8 @@
 # 🚨 Real-Time UPI Fraud Detection System
 
-An end-to-end Machine Learning pipeline and real-time API for detecting fraudulent UPI transactions. Built with **Python, FastAPI, Scikit-Learn, and Streamlit**.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Click_Here-00e5ff?style=for-the-badge&logo=render)](https://upi-fraud-engine-u8uo.onrender.com/)
+
+An end-to-end Machine Learning pipeline and real-time API for detecting fraudulent UPI transactions. Built with **Python, FastAPI, Scikit-Learn, and Tailwind CSS**.
 
 ## 📊 Overview
 This project simulates, processes, and analyzes UPI (Unified Payments Interface) transactions to detect fraud in real-time. It uses a hybrid scoring engine combining:
