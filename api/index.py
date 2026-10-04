@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import pandas as pd
 import numpy as np
@@ -17,8 +19,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load artifacts
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Serve the static frontend UI
+app.mount("/public", StaticFiles(directory=os.path.join(base_dir, "public")), name="public")
+
+@app.get("/")
+def serve_frontend():
+    return FileResponse(os.path.join(base_dir, "public", "index.html"))
+
+# Load artifacts
 try:
     iso_forest = joblib.load(os.path.join(base_dir, 'isolation_forest.joblib'))
     ml_features = joblib.load(os.path.join(base_dir, 'model_features.joblib'))
