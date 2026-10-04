@@ -135,50 +135,66 @@
                 <span class="font-bold text-xl text-dark">IronClad<span class="text-muted font-normal">.Ai</span></span>
             </div>
 
-            <div class="text-center mb-8">
+            <div class="text-center mb-6">
                 <h2 class="text-3xl font-bold text-dark mb-2">Simulate Transaction</h2>
-                <p class="text-muted text-sm">Enter payment details to test the ML engine.</p>
+                <p class="text-muted text-sm">Use a quick-test scenario or manually enter details.</p>
+            </div>
+            
+            <!-- Quick Test Scenarios -->
+            <div class="flex gap-2 justify-center mb-8 max-w-sm mx-auto">
+                <button type="button" onclick="loadSafeScenario()" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 px-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Safe Scenario
+                </button>
+                <button type="button" onclick="loadFraudScenario()" class="flex-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2 px-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Fraud Attack
+                </button>
             </div>
 
             <form id="fraudForm" class="space-y-4 max-w-sm mx-auto w-full">
                 
                 <div class="space-y-1">
-                    <label class="text-xs font-semibold text-muted ml-1">User Profile</label>
+                    <label class="text-xs font-semibold text-muted ml-1">User Account</label>
                     <select id="user_id" class="w-full input-box">
-                        <option value="user_1">USER-001 (High Volume)</option>
+                        <option value="user_1">USER-001 (Active User)</option>
                         <option value="user_42">USER-042 (New Account)</option>
-                        <option value="user_99">USER-099 (Standard)</option>
                     </select>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-xs font-semibold text-muted ml-1">Amount (₹)</label>
-                    <input type="number" id="amount" value="1500" class="w-full input-box">
+                    <label class="text-xs font-semibold text-muted ml-1">Transfer Amount (₹)</label>
+                    <input type="number" id="amount" value="1500" class="w-full input-box" placeholder="e.g. 500">
                 </div>
 
-                <div class="space-y-1">
-                    <label class="text-xs font-semibold text-muted ml-1">Merchant Category</label>
-                    <select id="category" class="w-full input-box">
-                        <option value="Grocery">Grocery</option>
-                        <option value="Electronics">Electronics</option>
-                        <option value="Transfer">Transfer</option>
-                    </select>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-xs font-semibold text-muted ml-1">Location Data</label>
-                    <input type="text" id="location" value="Mumbai" class="w-full input-box">
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-xs font-semibold text-muted ml-1">Device Fingerprint</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="device" value="dev_x99" class="w-full input-box font-mono text-sm">
-                        <button type="button" onclick="document.getElementById('device').value='dev_'+Math.random().toString(36).substring(7)" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 rounded-xl text-xs font-semibold transition-colors">NEW</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-muted ml-1">Category</label>
+                        <select id="category" class="w-full input-box">
+                            <option value="Grocery">Grocery</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Transfer">Transfer</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-muted ml-1">Location</label>
+                        <select id="location" class="w-full input-box">
+                            <option value="Mumbai">Mumbai (Home)</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Moscow">Moscow (Foreign)</option>
+                        </select>
                     </div>
                 </div>
 
-                <button type="submit" id="submitBtn" class="w-full btn-blue py-3 mt-4 text-sm">
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-muted ml-1">Device Status</label>
+                    <select id="device" class="w-full input-box">
+                        <option value="known_device_1">My iPhone (Known Device)</option>
+                        <option value="unknown_hacker_device">Unrecognized Web Browser</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full btn-blue py-3 mt-4 text-sm font-bold shadow-lg shadow-blue-200">
                     Analyze Transaction
                 </button>
             </form>
@@ -190,15 +206,30 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                     Upload CSV Batch
                 </button>
-                <p class="text-[10px] text-gray-400 mt-2">Format: user_id, amount, merchant_category, device_id, location</p>
+                <p class="text-[10px] text-gray-400 mt-2">Upload dataset to generate PDF Report</p>
             </div>
         </div>
     </div>
 
     <script>
         let gaugeChart = null;
-
-        // Bulk CSV Upload Logic
+        
+        // Scenario Helpers
+        function loadSafeScenario() {
+            document.getElementById('user_id').value = 'user_1';
+            document.getElementById('amount').value = '450';
+            document.getElementById('category').value = 'Grocery';
+            document.getElementById('location').value = 'Mumbai';
+            document.getElementById('device').value = 'known_device_1';
+        }
+        
+        function loadFraudScenario() {
+            document.getElementById('user_id').value = 'user_1';
+            document.getElementById('amount').value = '85000';
+            document.getElementById('category').value = 'Transfer';
+            document.getElementById('location').value = 'Moscow';
+            document.getElementById('device').value = 'unknown_hacker_device';
+        }
         document.getElementById('csvFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
