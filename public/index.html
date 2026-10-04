@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { 
-            background-color: #d1f0d1; /* Soft green outer background */
+            background-color: #e0e7ff; /* Soft indigo outer background */
             font-family: 'Poppins', sans-serif; 
             min-height: 100vh;
             display: flex;
@@ -21,7 +21,7 @@
         
         /* Main Container mimicking the tablet/screen in the reference */
         .main-container {
-            background-color: #2b533b; /* Darker forest green */
+            background-color: #1e3a8a; /* Darker navy blue */
             border-radius: 2rem;
             width: 100%;
             max-w: 1200px;
@@ -34,7 +34,7 @@
         /* Left side - Illustration / Results */
         .left-panel {
             flex: 1;
-            background-color: #c0ebc0; /* Light mint green */
+            background-color: #dbeafe; /* Light blue */
             padding: 3rem;
             display: flex;
             flex-direction: column;
@@ -65,21 +65,21 @@
             font-size: 0.9rem;
             transition: all 0.3s ease;
         }
-        .input-box:focus { outline: none; border-color: #92d092; box-shadow: 0 0 0 3px rgba(146, 208, 146, 0.2); }
+        .input-box:focus { outline: none; border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2); }
         
         /* Button */
-        .btn-green {
-            background-color: #92d092;
-            color: #1a4025;
+        .btn-blue {
+            background-color: #3b82f6;
+            color: #ffffff;
             border-radius: 1rem;
             font-weight: 600;
             transition: all 0.2s ease;
         }
-        .btn-green:hover { background-color: #7bc07b; transform: translateY(-2px); }
+        .btn-blue:hover { background-color: #2563eb; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
         
         /* Typography */
-        .text-dark { color: #1a1a1a; }
-        .text-muted { color: #718096; }
+        .text-dark { color: #1e293b; }
+        .text-muted { color: #64748b; }
         
         @media (max-width: 768px) {
             .main-container { flex-direction: column; }
@@ -97,29 +97,29 @@
             <!-- Default Idle View -->
             <div id="idleView" class="w-full">
                 <!-- SVG Illustration placeholder (mimicking the 3D guy) -->
-                <img src="https://raw.githubusercontent.com/PKief/vscode-material-icon-theme/main/icons/folder-secure.svg" alt="Security" class="w-48 h-48 mx-auto mb-8 drop-shadow-2xl opacity-80">
-                <h1 class="text-3xl font-bold text-[#1a4025] mb-4">Sentinel Engine</h1>
-                <p class="text-[#2b533b] font-medium max-w-sm mx-auto">
+                <img src="https://raw.githubusercontent.com/PKief/vscode-material-icon-theme/main/icons/folder-secure.svg" alt="Security" class="w-48 h-48 mx-auto mb-8 drop-shadow-2xl opacity-80" style="filter: hue-rotate(180deg);">
+                <h1 class="text-3xl font-bold text-[#1e3a8a] mb-4">Sentinel Engine</h1>
+                <p class="text-[#1e40af] font-medium max-w-sm mx-auto">
                     Inject a simulated transaction into the system to analyze behavioral anomalies in real-time.
                 </p>
             </div>
 
             <!-- Results View (Hidden by default) -->
             <div id="resultsView" class="w-full hidden opacity-0 transition-opacity duration-500">
-                <div class="bg-white/40 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-white/50 w-full max-w-md mx-auto">
+                <div class="bg-white/50 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-white/60 w-full max-w-md mx-auto">
                     <h2 id="statusText" class="text-2xl font-bold mb-1"></h2>
                     <p id="statusSubtext" class="text-sm font-medium mb-6"></p>
                     
                     <div class="relative w-40 h-40 mx-auto mb-4">
                         <canvas id="gaugeChart"></canvas>
                         <div class="absolute inset-0 flex items-center justify-center flex-col mt-6">
-                            <span id="scoreText" class="text-4xl font-bold text-[#1a4025]"></span>
+                            <span id="scoreText" class="text-4xl font-bold text-[#1e3a8a]"></span>
                         </div>
                     </div>
                     
                     <div class="text-left mt-6">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-[#2b533b] mb-2">Threat Intelligence</h3>
-                        <div id="reasonsList" class="space-y-2 text-sm text-[#1a4025] font-medium"></div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-[#1e40af] mb-2">Threat Intelligence</h3>
+                        <div id="reasonsList" class="space-y-2 text-sm text-[#1e3a8a] font-medium"></div>
                     </div>
                 </div>
             </div>
@@ -129,7 +129,7 @@
         <!-- RIGHT PANEL (Form) -->
         <div class="right-panel">
             <div class="flex items-center gap-2 mb-8 justify-center">
-                <svg class="w-6 h-6 text-[#92d092]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <svg class="w-6 h-6 text-[#3b82f6]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                 <span class="font-bold text-xl text-dark">Sentinel<span class="text-muted font-normal">.ai</span></span>
             </div>
 
@@ -172,11 +172,11 @@
                     <label class="text-xs font-semibold text-muted ml-1">Device Fingerprint</label>
                     <div class="flex gap-2">
                         <input type="text" id="device" value="dev_x99" class="w-full input-box font-mono text-sm">
-                        <button type="button" onclick="document.getElementById('device').value='dev_'+Math.random().toString(36).substring(7)" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 rounded-xl text-xs font-semibold transition-colors">NEW</button>
+                        <button type="button" onclick="document.getElementById('device').value='dev_'+Math.random().toString(36).substring(7)" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 rounded-xl text-xs font-semibold transition-colors">NEW</button>
                     </div>
                 </div>
 
-                <button type="submit" id="submitBtn" class="w-full btn-green py-3 mt-4 text-sm shadow-lg shadow-green-200">
+                <button type="submit" id="submitBtn" class="w-full btn-blue py-3 mt-4 text-sm">
                     Analyze Transaction
                 </button>
             </form>
