@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upi-fraud-api
+  labels:
+    app: upi-fraud-api
+    tier: inference-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: upi-fraud-api
+  template:
+    metadata:
+      labels:
+        app: upi-fraud-api
+    spec:
+      containers:
+      - name: upi-fraud-api
+        image: upi-fraud-engine:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: PORT
+          value: "8000"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10

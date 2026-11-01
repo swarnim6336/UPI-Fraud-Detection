@@ -28,6 +28,22 @@ app.mount("/public", StaticFiles(directory=os.path.join(base_dir, "public")), na
 def serve_frontend():
     return FileResponse(os.path.join(base_dir, "public", "index.html"))
 
+@app.get("/health")
+@app.get("/api/health")
+def health_check():
+    models_ready = (
+        'iso_forest' in globals() and iso_forest is not None
+        and len(ml_features) > 0
+        and 'zscore_params' in globals() and zscore_params is not None
+        and not iqr_df.empty
+    )
+    return {
+        "status": "healthy" if models_ready else "degraded",
+        "models_loaded": bool(models_ready),
+        "total_historical_records": len(history_df) if not history_df.empty else 0,
+        "features_count": len(ml_features)
+    }
+
 # Load artifacts
 try:
     iso_forest = joblib.load(os.path.join(base_dir, 'isolation_forest.joblib'))

@@ -1,0 +1,53 @@
+# ==============================================================================
+# Docker Compose Orchestration: Real-Time UPI Fraud Detection & Feature Store
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # 1. FastAPI Fraud Detection Inference Service
+  fraud-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: upi-fraud-engine:latest
+    container_name: upi-fraud-engine
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - REDIS_HOST=redis-cache
+      - REDIS_PORT=6379
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      redis-cache:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - upi-network
+
+  # 2. Redis In-Memory Cache (Real-Time Feature Store & Velocity Tracking)
+  redis-cache:
+    image: redis:7-alpine
+    container_name: upi-redis-cache
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - upi-network
+
+networks:
+  upi-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

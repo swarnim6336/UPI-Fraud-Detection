@@ -4,12 +4,13 @@ import numpy as np
 import os
 
 # Load artifacts globally
+base_dir = os.path.dirname(os.path.abspath(__file__))
 ml_features = []
 try:
-    iso_forest = joblib.load('isolation_forest.joblib')
-    ml_features = joblib.load('model_features.joblib')
-    zscore_params = joblib.load('zscore_params.joblib')
-    iqr_df = pd.read_csv('iqr_thresholds.csv').set_index('user_id')
+    iso_forest = joblib.load(os.path.join(base_dir, 'isolation_forest.joblib'))
+    ml_features = joblib.load(os.path.join(base_dir, 'model_features.joblib'))
+    zscore_params = joblib.load(os.path.join(base_dir, 'zscore_params.joblib'))
+    iqr_df = pd.read_csv(os.path.join(base_dir, 'iqr_thresholds.csv')).set_index('user_id')
 except Exception as e:
     print(f"Warning: Artifacts not found or error loading them. {e}")
 
